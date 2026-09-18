@@ -1,0 +1,3 @@
+export default function AboutPage() {
+  return <div className="mx-auto max-w-4xl px-5 py-20 md:px-10"><p className="text-[10px] uppercase tracking-[.25em] text-[#d7b16f]">About the artist</p><h1 className="mt-4 font-serif text-6xl">Zvi Aharon</h1><div className="mt-8 space-y-5 text-lg leading-8 text-white/70"><p>Zvi Aharon is an Israeli contemporary artist whose intuitive painting practice emerged during a period of loss, upheaval and recovery.</p><p>He begins without a predetermined subject. Movement, color and emotion come first; figures, faces and symbols emerge during the act of painting.</p><p>His work moves between figuration and abstraction, darkness and light, pain and hope, isolation and connection.</p></div></div>;
+}
