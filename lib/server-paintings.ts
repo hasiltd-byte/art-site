@@ -6,7 +6,11 @@ import type { Painting } from "@/types/painting";
 export async function getServerPaintings(): Promise<Painting[]> {
   if (process.env.PAINTING_DATA_SOURCE !== "mongodb") return seedPaintings;
   await connectMongo();
-  const docs = await PaintingModel.find().sort({ order: 1 }).lean();
+  let docs = await PaintingModel.find().sort({ order: 1 }).lean();
+  if (docs.length === 0) {
+    await PaintingModel.insertMany(seedPaintings, { ordered: true });
+    docs = await PaintingModel.find().sort({ order: 1 }).lean();
+  }
   return JSON.parse(JSON.stringify(docs)) as Painting[];
 }
 

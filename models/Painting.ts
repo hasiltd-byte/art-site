@@ -6,6 +6,7 @@ const PaintingSchema = new Schema(
     title: { type: String, required: true },
     titleHe: String,
     imageUrl: { type: String, required: true },
+    imagePublicId: String,
     medium: { type: String, required: true },
     dimensions: { type: String, required: true },
     availability: { type: String, required: true },
