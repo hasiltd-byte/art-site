@@ -2,7 +2,9 @@ import { NextResponse } from "next/server";
 import { connectMongo } from "@/lib/mongoose";
 import { PaintingModel } from "@/models/Painting";
 
-const requiredFields = ["slug", "title", "imageUrl", "medium", "dimensions", "availability", "description"] as const;
+function slugify(value: string) {
+  return value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || `painting-${Date.now()}`;
+}
 
 function paintingPayload(input: Record<string, unknown>) {
   const payload = Object.fromEntries(
@@ -10,8 +12,12 @@ function paintingPayload(input: Record<string, unknown>) {
       .filter((field) => input[field] !== undefined)
       .map((field) => [field, input[field]])
   );
-  const missing = requiredFields.filter((field) => !payload[field]);
-  return { payload, missing };
+  if (typeof payload.title === "string" && payload.title.trim()) {
+    const title = payload.title.trim();
+    payload.title = title;
+    payload.slug = typeof payload.slug === "string" && payload.slug.trim() ? slugify(payload.slug) : slugify(title);
+  }
+  return { payload };
 }
 
 export async function GET() {
@@ -25,8 +31,8 @@ export async function POST(request: Request) {
   if (process.env.PAINTING_DATA_SOURCE !== "mongodb") return NextResponse.json({ error: "MongoDB mode is disabled." }, { status: 409 });
   await connectMongo();
   const input = await request.json();
-  const { payload, missing } = paintingPayload(input);
-  if (missing.length) return NextResponse.json({ error: `Missing fields: ${missing.join(", ")}` }, { status: 400 });
+  const { payload } = paintingPayload(input);
+  if (typeof payload.title !== "string" || !payload.title.trim()) return NextResponse.json({ error: "Title is required." }, { status: 400 });
   try {
     const painting = await PaintingModel.create(payload);
     return NextResponse.json(painting, { status: 201 });

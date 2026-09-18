@@ -15,7 +15,7 @@ export function ArtworkDetailClient({ fallback }: { fallback: Painting }) {
     <>
       <section className="grid gap-10 py-10 lg:grid-cols-[62%_38%] lg:gap-0 lg:py-16">
         <div className="relative min-h-[520px] border border-white/10 bg-black lg:min-h-[680px]">
-          <Image src={painting.imageUrl} alt={painting.title} fill priority sizes="(max-width: 1024px) 100vw, 62vw" className="object-contain p-4 md:p-8" />
+          {painting.imageUrl ? <Image src={painting.imageUrl} alt={painting.title} fill priority sizes="(max-width: 1024px) 100vw, 62vw" className="object-contain p-4 md:p-8" /> : <div className="flex h-full items-center justify-center p-8 text-center font-serif text-4xl text-white/35">Image coming soon</div>}
         </div>
         <div className="flex flex-col justify-center px-0 py-8 lg:px-12 lg:py-0">
           <p className="text-[10px] uppercase tracking-[.25em] text-[#d7b16f]">Original artwork</p>
@@ -40,7 +40,7 @@ export function ArtworkDetailClient({ fallback }: { fallback: Painting }) {
         <div className="mt-7 grid gap-8 md:grid-cols-2">
           {related.map((item) => (
             <Link key={item.slug} href={`/works/${item.slug}`} className="group grid grid-cols-[150px_1fr] gap-5 border border-white/10 p-4 transition hover:border-[#d7b16f]/40">
-              <div className="relative aspect-square bg-black"><Image src={item.imageUrl} alt={item.title} fill className="object-contain" /></div>
+              <div className="relative aspect-square bg-black">{item.imageUrl ? <Image src={item.imageUrl} alt={item.title} fill className="object-contain" /> : <div className="flex h-full items-center justify-center p-4 text-center text-xs text-white/35">Image coming soon</div>}</div>
               <div className="self-center"><h3 className="font-serif text-2xl text-[#f5eee4]">{item.title}</h3><p className="mt-2 text-xs text-white/40">{item.medium}</p></div>
             </Link>
           ))}

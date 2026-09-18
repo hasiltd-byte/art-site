@@ -23,7 +23,7 @@ export function RoomViewer({ artworkUrl, title }: { artworkUrl: string; title: s
         <p className="hidden max-w-md text-right text-xs leading-5 text-white/45 md:block">Room previews are visual scale references. The original dimensions remain listed above.</p>
       </div>
 
-      <div className="relative overflow-hidden border border-white/10 bg-black" style={{ aspectRatio: "4 / 5" }}>
+      {!artworkUrl ? <div className="border border-white/10 bg-black p-8 text-center text-sm text-white/40">Upload an image to preview this work in a room.</div> : <div className="relative overflow-hidden border border-white/10 bg-black" style={{ aspectRatio: "4 / 5" }}>
         <Image src={active.src} alt={`${active.label} mockup`} fill sizes="(max-width: 1024px) 100vw, 70vw" className="object-cover" />
         <div
           className="absolute flex items-center justify-center border border-[#23180e] bg-[#111] p-[0.35%] shadow-[0_15px_35px_rgba(0,0,0,.35)]"
@@ -33,7 +33,7 @@ export function RoomViewer({ artworkUrl, title }: { artworkUrl: string; title: s
             <Image src={artworkUrl} alt={`${title} in ${active.label}`} fill sizes="50vw" className="object-contain" />
           </div>
         </div>
-      </div>
+      </div>}
 
       <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">
         {rooms.map((room) => (

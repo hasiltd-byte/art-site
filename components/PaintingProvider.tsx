@@ -14,9 +14,11 @@ const PaintingContext = createContext<PaintingContextValue | null>(null);
 
 export function PaintingProvider({
   initialPaintings,
+  dataSource,
   children,
 }: {
   initialPaintings: Painting[];
+  dataSource?: string;
   children: React.ReactNode;
 }) {
   const [paintings, setPaintings] = useState(initialPaintings);
@@ -24,25 +26,25 @@ export function PaintingProvider({
   useEffect(() => {
     try {
       const cached = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (cached) setPaintings(JSON.parse(cached));
+      if (dataSource !== "mongodb" && cached) setPaintings(JSON.parse(cached));
     } catch {
       // Ignore malformed browser cache and keep server seed.
     }
-  }, []);
+  }, [dataSource]);
 
   const value = useMemo(
     () => ({
       paintings,
       savePaintings(next: Painting[]) {
         setPaintings(next);
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(next));
+        if (dataSource !== "mongodb") localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(next));
       },
       resetPaintings() {
-        localStorage.removeItem(LOCAL_STORAGE_KEY);
+        if (dataSource !== "mongodb") localStorage.removeItem(LOCAL_STORAGE_KEY);
         setPaintings(initialPaintings);
       },
     }),
-    [paintings, initialPaintings]
+    [paintings, initialPaintings, dataSource]
   );
 
   return <PaintingContext.Provider value={value}>{children}</PaintingContext.Provider>;

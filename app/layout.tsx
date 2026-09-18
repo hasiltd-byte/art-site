@@ -15,7 +15,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   return (
     <html lang="en">
       <body>
-        <PaintingProvider initialPaintings={JSON.parse(JSON.stringify(paintings))}>
+        <PaintingProvider initialPaintings={JSON.parse(JSON.stringify(paintings))} dataSource={process.env.PAINTING_DATA_SOURCE}>
           <div className="min-h-screen bg-[radial-gradient(circle_at_20%_10%,rgba(128,88,38,.12),transparent_25%),#090a0a]">
             <Header />
             <main>{children}</main>
