@@ -17,6 +17,8 @@ const emptyForm = {
   order: "0",
 };
 
+type AdminPainting = { slug: string; title: string; imageUrl?: string; imagePublicId?: string };
+
 export default function AdminPage() {
   const [user, setUser] = useState<{ name?: string; email: string; role: string } | null | undefined>(undefined);
   const [form, setForm] = useState(emptyForm);
@@ -24,10 +26,16 @@ export default function AdminPage() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState("");
   const [saving, setSaving] = useState(false);
+  const [paintings, setPaintings] = useState<AdminPainting[]>([]);
 
   useEffect(() => {
     fetch("/api/auth/me").then((response) => response.json()).then((result) => setUser(result.user ?? null)).catch(() => setUser(null));
   }, []);
+
+  useEffect(() => {
+    if (user?.role !== "admin") return;
+    fetch("/api/paintings").then((response) => response.json()).then((result) => setPaintings(Array.isArray(result) ? result : [])).catch(() => setPaintings([]));
+  }, [user]);
 
   function updateField(field: keyof typeof emptyForm, value: string) {
     setForm((current) => ({ ...current, [field]: value }));
@@ -61,11 +69,26 @@ export default function AdminPage() {
       setForm(emptyForm);
       setImageFile(null);
       setImagePreview("");
+      setPaintings((current) => [...current, result]);
       setMessage(`Saved “${result.title}” to MongoDB.`);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Could not save painting.");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function removePainting(painting: AdminPainting) {
+    if (!window.confirm(`Remove “${painting.title}” from the collection?`)) return;
+    setMessage(`Removing “${painting.title}”...`);
+    try {
+      const response = await fetch(`/api/paintings/${encodeURIComponent(painting.slug)}`, { method: "DELETE" });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error ?? "Could not remove painting");
+      setPaintings((current) => current.filter((item) => item.slug !== painting.slug));
+      setMessage(result.cloudinaryDeleted ? "Painting and Cloudinary image removed." : "Painting removed. Add Cloudinary API credentials to also delete its image asset.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Could not remove painting.");
     }
   }
 
@@ -94,6 +117,19 @@ export default function AdminPage() {
         <button type="submit" disabled={saving} className="w-fit border border-[#d7b16f] px-5 py-3 text-xs uppercase tracking-[.15em] disabled:cursor-wait disabled:opacity-50">{saving ? "Saving..." : "Upload and save"}</button>
       </form>
       {message && <p className="mt-4 text-sm text-white/60">{message}</p>}
+      <section className="mt-16 border-t border-white/10 pt-10">
+        <p className="text-[10px] uppercase tracking-[.25em] text-[#d7b16f]">Collection</p>
+        <h2 className="mt-3 font-serif text-4xl">Manage paintings</h2>
+        <div className="mt-6 divide-y divide-white/10 border-y border-white/10">
+          {paintings.map((painting) => (
+            <div key={painting.slug} className="flex items-center justify-between gap-4 py-4">
+              <div className="min-w-0"><p className="truncate font-serif text-xl text-white/85">{painting.title}</p><p className="truncate text-xs text-white/40">{painting.slug}</p></div>
+              <button type="button" onClick={() => removePainting(painting)} className="shrink-0 border border-red-300/50 px-3 py-2 text-[10px] uppercase tracking-[.15em] text-red-200 hover:bg-red-300/10">Remove</button>
+            </div>
+          ))}
+          {!paintings.length && <p className="py-6 text-sm text-white/45">No paintings found.</p>}
+        </div>
+      </section>
     </div>
     )
   );

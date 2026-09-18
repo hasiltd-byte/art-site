@@ -1,9 +1,27 @@
 import { NextResponse } from "next/server";
+import { createHash } from "node:crypto";
 import { connectMongo } from "@/lib/mongoose";
 import { PaintingModel } from "@/models/Painting";
 import { requireAdmin } from "@/lib/auth";
 
 const editableFields = ["slug", "title", "titleHe", "imageUrl", "imagePublicId", "medium", "dimensions", "availability", "description", "quote", "featured", "order"] as const;
+
+async function deleteCloudinaryAsset(publicId: string | undefined) {
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+  const apiKey = process.env.CLOUDINARY_API_KEY;
+  const apiSecret = process.env.CLOUDINARY_API_SECRET;
+  if (!publicId || !cloudName || !apiKey || !apiSecret) return false;
+
+  const timestamp = Math.floor(Date.now() / 1000);
+  const signature = createHash("sha1").update(`public_id=${publicId}&timestamp=${timestamp}${apiSecret}`).digest("hex");
+  const formData = new FormData();
+  formData.append("public_id", publicId);
+  formData.append("timestamp", String(timestamp));
+  formData.append("api_key", apiKey);
+  formData.append("signature", signature);
+  const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/destroy`, { method: "POST", body: formData });
+  return response.ok;
+}
 
 function cleanImageUrl(value: unknown) {
   if (typeof value !== "string" || !value.trim()) return undefined;
@@ -20,7 +38,7 @@ export async function GET(_: Request, { params }: { params: Promise<{ slug: stri
   if (process.env.PAINTING_DATA_SOURCE !== "mongodb") return NextResponse.json({ error: "MongoDB mode is disabled." }, { status: 409 });
   await connectMongo();
   const { slug } = await params;
-  const painting = await PaintingModel.findOne({ slug }).lean();
+  const painting = await PaintingModel.findOne({ slug }).lean() as { imagePublicId?: string } | null;
   return painting ? NextResponse.json(painting) : NextResponse.json({ error: "Not found" }, { status: 404 });
 }
 
@@ -45,6 +63,9 @@ export async function DELETE(_: Request, { params }: { params: Promise<{ slug: s
   if (!await requireAdmin()) return NextResponse.json({ error: "Admin access is required." }, { status: 403 });
   await connectMongo();
   const { slug } = await params;
+  const painting = await PaintingModel.findOne({ slug }).lean() as { imagePublicId?: string } | null;
+  if (!painting) return NextResponse.json({ error: "Not found" }, { status: 404 });
   await PaintingModel.deleteOne({ slug });
-  return new NextResponse(null, { status: 204 });
+  const cloudinaryDeleted = await deleteCloudinaryAsset(painting.imagePublicId);
+  return NextResponse.json({ deleted: true, cloudinaryDeleted });
 }
