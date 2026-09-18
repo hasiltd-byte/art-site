@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { WorksClient } from "@/components/WorksClient";
 
 export const metadata: Metadata = { title: "Works" };
+export const dynamic = "force-dynamic";
 
 export default function WorksPage() {
   return (

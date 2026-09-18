@@ -3,6 +3,8 @@ import { connectMongo } from "@/lib/mongoose";
 import { PaintingModel } from "@/models/Painting";
 import { requireAdmin } from "@/lib/auth";
 
+export const dynamic = "force-dynamic";
+
 function slugify(value: string) {
   return value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || `painting-${Date.now()}`;
 }

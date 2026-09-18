@@ -5,6 +5,8 @@ import { Footer } from "@/components/Footer";
 import { PaintingProvider } from "@/components/PaintingProvider";
 import { getServerPaintings } from "@/lib/server-paintings";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: { default: "Zvi Aharon Art", template: "%s | Zvi Aharon" },
   description: "Contemporary intuitive painting by Israeli artist Zvi Aharon.",
