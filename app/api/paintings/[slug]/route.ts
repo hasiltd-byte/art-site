@@ -5,6 +5,17 @@ import { requireAdmin } from "@/lib/auth";
 
 const editableFields = ["slug", "title", "titleHe", "imageUrl", "imagePublicId", "medium", "dimensions", "availability", "description", "quote", "featured", "order"] as const;
 
+function cleanImageUrl(value: unknown) {
+  if (typeof value !== "string" || !value.trim()) return undefined;
+  const imageUrl = value.trim();
+  if (imageUrl.startsWith("/")) return imageUrl;
+  const parsed = new URL(imageUrl);
+  if (parsed.protocol !== "https:" || parsed.hostname !== "res.cloudinary.com") throw new Error("Image URL must be a Cloudinary URL.");
+  parsed.search = "";
+  parsed.hash = "";
+  return parsed.toString();
+}
+
 export async function GET(_: Request, { params }: { params: Promise<{ slug: string }> }) {
   if (process.env.PAINTING_DATA_SOURCE !== "mongodb") return NextResponse.json({ error: "MongoDB mode is disabled." }, { status: 409 });
   await connectMongo();
@@ -19,7 +30,12 @@ export async function PUT(request: Request, { params }: { params: Promise<{ slug
   await connectMongo();
   const { slug } = await params;
   const input = await request.json();
-  const payload = Object.fromEntries(editableFields.filter((field) => input[field] !== undefined).map((field) => [field, input[field]]));
+  let payload: Record<string, unknown>;
+  try {
+    payload = Object.fromEntries(editableFields.filter((field) => input[field] !== undefined).map((field) => [field, field === "imageUrl" ? cleanImageUrl(input[field]) : input[field]]));
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Invalid image URL." }, { status: 400 });
+  }
   const painting = await PaintingModel.findOneAndUpdate({ slug }, { $set: payload }, { new: true, runValidators: true }).lean();
   return painting ? NextResponse.json(painting) : NextResponse.json({ error: "Not found" }, { status: 404 });
 }

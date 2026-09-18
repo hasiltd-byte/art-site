@@ -7,6 +7,17 @@ function slugify(value: string) {
   return value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || `painting-${Date.now()}`;
 }
 
+function cleanImageUrl(value: unknown) {
+  if (typeof value !== "string" || !value.trim()) return undefined;
+  const imageUrl = value.trim();
+  if (imageUrl.startsWith("/")) return imageUrl;
+  const parsed = new URL(imageUrl);
+  if (parsed.protocol !== "https:" || parsed.hostname !== "res.cloudinary.com") throw new Error("Image URL must be a Cloudinary URL.");
+  parsed.search = "";
+  parsed.hash = "";
+  return parsed.toString();
+}
+
 function paintingPayload(input: Record<string, unknown>) {
   const payload = Object.fromEntries(
     ["slug", "title", "titleHe", "imageUrl", "imagePublicId", "medium", "dimensions", "availability", "description", "quote", "featured", "order"]
@@ -18,6 +29,7 @@ function paintingPayload(input: Record<string, unknown>) {
     payload.title = title;
     payload.slug = typeof payload.slug === "string" && payload.slug.trim() ? slugify(payload.slug) : slugify(title);
   }
+  if (payload.imageUrl !== undefined) payload.imageUrl = cleanImageUrl(payload.imageUrl);
   return { payload };
 }
 
@@ -33,7 +45,12 @@ export async function POST(request: Request) {
   if (!await requireAdmin()) return NextResponse.json({ error: "Admin access is required." }, { status: 403 });
   await connectMongo();
   const input = await request.json();
-  const { payload } = paintingPayload(input);
+  let payload: Record<string, unknown>;
+  try {
+    payload = paintingPayload(input).payload;
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Invalid image URL." }, { status: 400 });
+  }
   if (typeof payload.title !== "string" || !payload.title.trim()) return NextResponse.json({ error: "Title is required." }, { status: 400 });
   try {
     const painting = await PaintingModel.create(payload);

@@ -30,7 +30,7 @@ export function RoomViewer({ artworkUrl, title }: { artworkUrl: string; title: s
           style={{ left: `${active.frame.left}%`, top: `${active.frame.top}%`, width: `${active.frame.width}%`, height: `${active.frame.height}%` }}
         >
           <div className="relative h-full w-full bg-black">
-            <Image src={artworkUrl} alt={`${title} in ${active.label}`} fill sizes="50vw" className="object-contain" />
+            <Image unoptimized={artworkUrl.startsWith("https://res.cloudinary.com/")} src={artworkUrl} alt={`${title} in ${active.label}`} fill sizes="50vw" className="object-contain" />
           </div>
         </div>
       </div>}
