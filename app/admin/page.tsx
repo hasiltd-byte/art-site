@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useEffect } from "react";
+import Link from "next/link";
 
 const emptyForm = {
   slug: "",
@@ -16,11 +18,16 @@ const emptyForm = {
 };
 
 export default function AdminPage() {
+  const [user, setUser] = useState<{ name?: string; email: string; role: string } | null | undefined>(undefined);
   const [form, setForm] = useState(emptyForm);
   const [message, setMessage] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState("");
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/auth/me").then((response) => response.json()).then((result) => setUser(result.user ?? null)).catch(() => setUser(null));
+  }, []);
 
   function updateField(field: keyof typeof emptyForm, value: string) {
     setForm((current) => ({ ...current, [field]: value }));
@@ -63,6 +70,7 @@ export default function AdminPage() {
   }
 
   return (
+    user === undefined ? <div className="mx-auto max-w-5xl px-5 py-16 text-sm text-white/50 md:px-10">Checking access...</div> : !user ? <div className="mx-auto max-w-5xl px-5 py-16 md:px-10"><h1 className="font-serif text-5xl">Admin access</h1><p className="mt-4 text-white/55">Log in with an admin account to manage paintings.</p><Link href="/login" className="mt-7 inline-flex border border-[#d7b16f] px-5 py-3 text-xs uppercase tracking-[.15em]">Log in</Link></div> : user.role !== "admin" ? <div className="mx-auto max-w-5xl px-5 py-16 md:px-10"><h1 className="font-serif text-5xl">Admin access required</h1><p className="mt-4 text-white/55">Your account is signed in, but it does not have the admin role.</p></div> : (
     <div className="mx-auto max-w-5xl px-5 py-16 md:px-10">
       <p className="text-[10px] uppercase tracking-[.25em] text-[#d7b16f]">MongoDB content editor</p>
       <h1 className="mt-3 font-serif text-5xl">Add a painting</h1>
@@ -87,5 +95,6 @@ export default function AdminPage() {
       </form>
       {message && <p className="mt-4 text-sm text-white/60">{message}</p>}
     </div>
+    )
   );
 }

@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/auth";
 
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
+  if (!await requireAdmin()) return NextResponse.json({ error: "Admin access is required." }, { status: 403 });
   const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
   const uploadPreset = process.env.CLOUDINARY_PRESET ?? process.env.CLOUDINARY_UPLOAD_PRESET;
   if (!cloudName || !uploadPreset) {
