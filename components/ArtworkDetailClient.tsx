@@ -10,11 +10,12 @@ export function ArtworkDetailClient({ fallback }: { fallback: Painting }) {
   const { paintings } = usePaintings();
   const painting = paintings.find((item) => item.slug === fallback.slug) ?? fallback;
   const related = paintings.filter((item) => item.slug !== painting.slug).slice(0, 2);
+  const aspectRatio = painting.imageWidth && painting.imageHeight ? `${painting.imageWidth} / ${painting.imageHeight}` : "4 / 5";
 
   return (
     <>
       <section className="grid gap-10 py-10 lg:grid-cols-[62%_38%] lg:gap-0 lg:py-16">
-        <div className="relative min-h-[520px] border border-white/10 bg-black lg:min-h-[680px]">
+        <div className="relative w-full self-start overflow-hidden border border-white/10 bg-black" style={{ aspectRatio }}>
           {painting.imageUrl ? <Image unoptimized={painting.imageUrl.startsWith("https://res.cloudinary.com/")} src={painting.imageUrl} alt={painting.title} fill priority sizes="(max-width: 1024px) 100vw, 62vw" className="object-contain p-4 md:p-8" /> : <div className="flex h-full items-center justify-center p-8 text-center font-serif text-4xl text-white/35">Image coming soon</div>}
         </div>
         <div className="flex flex-col justify-center px-0 py-8 lg:px-12 lg:py-0">

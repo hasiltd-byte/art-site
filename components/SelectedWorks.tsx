@@ -28,13 +28,13 @@ export function SelectedWorks() {
           {selected.map((painting) => (
             <Link key={painting.slug} href={`/works/${painting.slug}`} className="group block">
               <div className="relative aspect-[3/4] overflow-hidden border border-[#d7b16f]/25 bg-black shadow-[0_0_35px_rgba(215,177,111,.08)]">
-                <Image
-                  src={painting.imageUrl}
-                  alt={painting.title}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 30vw"
-                  className="object-cover transition duration-700 group-hover:scale-[1.02]"
-                />
+                {painting.imageUrl && <Image
+                    src={painting.imageUrl}
+                    alt={painting.title}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 30vw"
+                    className="object-cover transition duration-700 group-hover:scale-[1.02]"
+                  />}
               </div>
               <h3 className="mt-4 font-serif text-lg uppercase tracking-[.08em] text-[#f7efe3]">{painting.title}</h3>
               <p className="mt-1 text-[10px] uppercase tracking-[.18em] text-white/45">{painting.medium}</p>

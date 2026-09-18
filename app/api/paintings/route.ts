@@ -22,7 +22,7 @@ function cleanImageUrl(value: unknown) {
 
 function paintingPayload(input: Record<string, unknown>) {
   const payload = Object.fromEntries(
-    ["slug", "title", "titleHe", "imageUrl", "imagePublicId", "medium", "dimensions", "availability", "description", "quote", "featured", "order"]
+    ["slug", "title", "titleHe", "imageUrl", "imagePublicId", "imageWidth", "imageHeight", "medium", "dimensions", "availability", "description", "quote", "featured", "order"]
       .filter((field) => input[field] !== undefined)
       .map((field) => [field, input[field]])
   );

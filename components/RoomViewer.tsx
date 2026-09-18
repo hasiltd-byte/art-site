@@ -10,7 +10,7 @@ const rooms = [
   { id: "gallery", label: "Gallery", src: "/mockups/gallery.jpg", frame: { left: 22.2, top: 19.5, width: 70.8, height: 33.1 } },
 ] as const;
 
-export function RoomViewer({ artworkUrl, title }: { artworkUrl: string; title: string }) {
+export function RoomViewer({ artworkUrl, title }: { artworkUrl?: string; title: string }) {
   const [active, setActive] = useState<(typeof rooms)[number]>(rooms[0]);
 
   return (

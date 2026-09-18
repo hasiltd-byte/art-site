@@ -4,7 +4,7 @@ import { connectMongo } from "@/lib/mongoose";
 import { PaintingModel } from "@/models/Painting";
 import { requireAdmin } from "@/lib/auth";
 
-const editableFields = ["slug", "title", "titleHe", "imageUrl", "imagePublicId", "medium", "dimensions", "availability", "description", "quote", "featured", "order"] as const;
+const editableFields = ["slug", "title", "titleHe", "imageUrl", "imagePublicId", "imageWidth", "imageHeight", "medium", "dimensions", "availability", "description", "quote", "featured", "order"] as const;
 
 async function deleteCloudinaryAsset(publicId: string | undefined) {
   const cloudName = process.env.CLOUDINARY_CLOUD_NAME;

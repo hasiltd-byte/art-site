@@ -36,5 +36,5 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: result.error?.message ?? "Cloudinary upload failed." }, { status: 502 });
   }
 
-  return NextResponse.json({ url: result.secure_url, publicId: result.public_id });
+  return NextResponse.json({ url: result.secure_url, publicId: result.public_id, width: result.width, height: result.height });
 }

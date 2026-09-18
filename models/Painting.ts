@@ -7,6 +7,8 @@ const PaintingSchema = new Schema(
     titleHe: String,
     imageUrl: String,
     imagePublicId: String,
+    imageWidth: Number,
+    imageHeight: Number,
     medium: String,
     dimensions: String,
     availability: String,

@@ -47,7 +47,7 @@ export default function AdminPage() {
     setMessage(imageFile ? "Uploading image to Cloudinary..." : "Saving painting to MongoDB...");
 
     try {
-      let imageData: { url?: string; publicId?: string } = {};
+      let imageData: { url?: string; publicId?: string; width?: number; height?: number } = {};
       if (imageFile) {
         const uploadData = new FormData();
         uploadData.append("file", imageFile);
@@ -61,7 +61,7 @@ export default function AdminPage() {
       const response = await fetch("/api/paintings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, imageUrl: imageData.url, imagePublicId: imageData.publicId, order: Number(form.order) || 0 }),
+        body: JSON.stringify({ ...form, imageUrl: imageData.url, imagePublicId: imageData.publicId, imageWidth: imageData.width, imageHeight: imageData.height, order: Number(form.order) || 0 }),
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error ?? "Could not save painting");
