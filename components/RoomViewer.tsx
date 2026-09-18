@@ -11,7 +11,7 @@ const rooms = [
 ] as const;
 
 export function RoomViewer({ artworkUrl, title }: { artworkUrl: string; title: string }) {
-  const [active, setActive] = useState(rooms[0]);
+  const [active, setActive] = useState<(typeof rooms)[number]>(rooms[0]);
 
   return (
     <section className="border-t border-white/10 py-12">
